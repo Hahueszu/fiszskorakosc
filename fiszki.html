@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fiszki do nauki angielskiego</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #121212;
+            color: #ffffff;
+        }
+
+        .card {
+            background: #1e1e1e;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            text-align: center;
+            width: 300px;
+        }
+
+        .input-container {
+            margin-top: 20px;
+        }
+
+        input {
+            padding: 10px;
+            width: 100%;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #2c2c2c;
+            color: #ffffff;
+        }
+
+        button {
+            margin-top: 10px;
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .feedback {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div id="word">Dom</div>
+
+        <div class="input-container">
+            <input type="text" id="answer" placeholder="Wpisz tłumaczenie" onkeypress="handleKeyPress(event)">
+            <button onclick="checkAnswer()">Sprawdź</button>
+        </div>
+
+        <div class="feedback" id="feedback"></div>
+    </div>
+
+    <script>
+        const words = [
+            { pl: "skóra właściwa", en: "dermis" },
+            { pl: "naskórek", en: "epidermis" },
+            { pl: "warstwa podskórna /tkanka tłuszczowa", en: "subcutaneous / fatty tissue" },
+            { pl: "warstwa rogowaciała", en: "cornified layer" },
+            { pl: "naczynia krwionośne", en: "blood vessel" },
+            { pl: "tkanka łączna", en: "connective tissue" },
+            { pl: "włosy", en: "hair" },
+            { pl: "mieszek włosowy", en: "hair follicle" },
+            { pl: "brodawka włosowa", en: "papilla of hair" },
+            { pl: "mieszek włosowy", en: "relus hair" },
+            { pl: "termalne, grubsze włosy", en: "terminal hair" },
+            { pl: "gruczoł mleczny", en: "mammary gland" },
+            { pl: "paznokieć", en: "nail" },
+            { pl: "gruczoł łojowy", en: "sebaceous gland" },
+            { pl: "podeszwa", en: "sole" },
+            { pl: "gruczoł potowy", en: "sweat gland" },
+            { pl: "mięsień włosa", en: "arrector muscle" },
+            { pl: "płaski", en: "flat" },
+            { pl: "mocny", en: "tough" },
+            { pl: "trądzik", en: "acne" },
+            { pl: "strup", en: "crust" },
+            { pl: "zapalenie skóry", en: "dermatitis" },
+            { pl: "grzybica", en: "dermatomycosis" },
+            { pl: "dostarczyć, zaopatrzyć", en: "provide" },
+            { pl: "złagodzić", en: "relieve" },
+            { pl: "zatrzymywać", en: "retain" },
+            { pl: "drapać", en: "scratch" },
+            { pl: "łój", en: "sebum" },
+            { pl: "wydzielanie", en: "secretion" },
+            { pl: "bodziec", en: "stimulus" },
+            { pl: "wyzwolić", en: "trigger" },
+            { pl: "wodoodporny", en: "waterproof" },
+            { pl: "wosk", en: "wax" },
+            { pl: "rumień", en: "erythema" },
+            { pl: "otarcie skóry, zadrapanie", en: "excoriation" },
+            { pl: "szczelina, pęknięcie", en: "fissure" },
+            { pl: "czyrak nogi", en: "furuncle" },
+            { pl: "zranienie, uszkodzenie", en: "injury" },
+            { pl: "podrażnienie", en: "irritation" },
+            { pl: "swędzieć", en: "itch" },
+            { pl: "uszkodzenie, zmiana chorobowa", en: "lesion" },
+            { pl: "znamię", en: "mole" },
+            { pl: "łuszczyca", en: "psoriasis" },
+            { pl: "wysypka", en: "rash" },
+            { pl: "świerzb", en: "scabies" },
+            { pl: "wrzód", en: "ulcer" },
+            { pl: "dwutlenek węgla", en: "carbon dioxide" },
+            { pl: "uszkodzenie", en: "damage" },
+            { pl: "rozpuszczony", en: "dissolved" },
+            { pl: "woskowina", en: "ear wax" },
+            { pl: "egzema", en: "eczema" },
+            { pl: "parować, ulatniać", en: "evaporate" },
+            { pl: "nadmierny", en: "excessive" },
+            { pl: "organ wydalniczy", en: "excretory organ" },
+            { pl: "wystawić, narazić", en: "expose" },
+            { pl: "maść", en: "ointment" },
+            { pl: "pocenie się", en: "perspiration" },
+            { pl: "ochrona", en: "protection" },
+            { pl: "odnoszący się do kończyn", en: "appendicular" },
+            { pl: "osiowy", en: "axial" },
+            { pl: "nadgarstkowy", en: "carpal" },
+            { pl: "szyjny", en: "cervical" },
+            { pl: "obojczyk", en: "clavicle" },
+            { pl: "kość guziczna", en: "coccyx" },
+            { pl: "mózgoczaszka", en: "cranium" },
+            { pl: "kość udowa", en: "femur" },
+            { pl: "kość strzałkowa", en: "fibula" },
+            { pl: "obręcz", en: "girdle" },
+            { pl: "kość ramieniowa", en: "humerus" },
+            { pl: "lędźwiowy", en: "lumbar" },
+            { pl: "śródstopny", en: "metacarpal" },
+            { pl: "śródręczny", en: "metatarsal" },
+            { pl: "rzepka", en: "patella" },
+            { pl: "paliczki", en: "phalanges" },
+            { pl: "kość promieniowa", en: "radis" },
+            { pl: "kość krzyżowa", en: "sacrum" },
+            { pl: "łopatka", en: "scapula" },
+            { pl: "czaszka", en: "skull" },
+            { pl: "mostek", en: "sternum" },
+            { pl: "kość piszczelowa", en: "tibia" },
+            { pl: "kość łokciowa", en: "ulna" },
+            { pl: "kręg", en: "vertebra" },
+	        { pl: "wydalać", en: "to excreate" },
+            { pl: "wydzielać", en: "to secrate" },
+            { pl: "otarcie", en: "graze" },
+            { pl: "pęcherz", en: "blister" },
+            { pl: "blizna", en: "scar" },
+            { pl: "oparzenie słoneczne", en: "sunburn" },
+            { pl: "pryszcz", en: "pimple" },
+            { pl: "krosta", en: "spot" },
+            { pl: "odmrożenie", en: "frostbite" },
+            { pl: "zauważyłem", en: "noticed" },
+            { pl: "zaczerwieniona", en: "reddened" },
+            { pl: "spuchnąć", en: "swelling" },
+            { pl: "opuchnięcie", en: "swell" },
+            { pl: "pyłki", en: "pollen" },
+            { pl: "roztocza", en: "dust nite" },
+            { pl: "kość czołowa", en: "Frontal Bone" },
+            { pl: "kość jarzmowa", en: "Zygomatic bone" },
+            { pl: "kość skroniowa", en: "Temporal bone" },
+            { pl: "szczęka", en: "Maxilla" },
+            { pl: "jama oczodołowa", en: "Orbital cavity" },
+            { pl: "żuchwa", en: "Mandible" },
+            { pl: "obojczyk", en: "Clavicle" },
+            { pl: "łopatka", en: "Scapula" },
+            { pl: "mostek", en: "Sternum" },
+            { pl: "żebra", en: "Ribs" },
+            { pl: "kość ramienna", en: "Humerus" },
+            { pl: "żebro wolne", en: "Floating rib" },
+            { pl: "kość nadgarstka", en: "Carpal" },
+            { pl: "kość śródręcza", en: "Metacarpal" },
+            { pl: "kręgosłup", en: "Vertebral column" },
+            { pl: "kość biodrowa", en: "Ilium" },
+            { pl: "kość guziczna", en: "Coccyx" },
+            { pl: "kość udowa", en: "Femur" },
+            { pl: "rzepka", en: "Patella" },
+            { pl: "kość piszczelowa", en: "Tibia" },
+            { pl: "kość stępu", en: "Tarsal" },
+            { pl: "kość strzałkowa", en: "Fibula" },
+            { pl: "dalsza phalanx", en: "Distal phalanx" },
+            { pl: "paliczek", en: "Phalanx" },
+            { pl: "środkowy paliczek", en: "Middle phalanx" },
+            { pl: "staw obrotowy", en: "Pivot joint" },
+            { pl: "staw siodełkowy", en: "Saddle joint" },
+            { pl: "staw płaski", en: "Plane joint" },
+            { pl: "staw zawiasowy", en: "Hinge joint" },
+            { pl: "staw elipsoidalny", en: "Condyloid joint" },
+                    ];
+
+        let currentIndex = -1;
+
+        function getRandomIndex() {
+            let newIndex;
+            do {
+                newIndex = Math.floor(Math.random() * words.length);
+            } while (newIndex === currentIndex);
+            currentIndex = newIndex;
+            return currentIndex;
+        }
+
+        function showNextWord() {
+            const randomIndex = getRandomIndex();
+            document.getElementById("word").textContent = words[randomIndex].pl;
+            document.getElementById("answer").value = "";
+            document.getElementById("feedback").textContent = "";
+        }
+
+        function checkAnswer() {
+            const userAnswer = document.getElementById("answer").value.trim().toLowerCase();
+            const correctAnswer = words[currentIndex].en.toLowerCase();
+
+            if (userAnswer === correctAnswer) {
+                document.getElementById("feedback").textContent = "Dobrze!";
+                document.getElementById("feedback").style.color = "green";
+                setTimeout(showNextWord, 1000);
+            } else {
+                document.getElementById("feedback").textContent = "Źle, poprawna odpowiedź to: " + correctAnswer;
+                document.getElementById("feedback").style.color = "red";
+            }
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === "Enter") {
+                checkAnswer();
+            }
+        }
+
+        // Initialize first word
+        showNextWord();
+    </script>
+</body>
+</html>
